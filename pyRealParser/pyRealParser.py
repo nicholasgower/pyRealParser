@@ -5,6 +5,33 @@ import itertools
 __license__ = 'MIT'
 __docformat__ = 'reStructuredText'
 
+def convert_iReal_url(url):
+    """ Removes encoding added to iReal tunes exported from the app.
+    """
+    
+    url=url.replace("irealb://","irealb://")
+    url=url.replace("%3D","=")
+    #url = urllib.parse.quote(url)
+    url = urllib.parse.unquote(url)
+    
+    url=url.replace(" ","%20")
+    #url=url.replace("^","%7C")
+    url=url.replace("=1=","==")
+    url=url.replace("=2=","==")
+    url=url.replace("=3=","==")
+    url=url.replace("=4=","==")
+    url=url.replace("=5=","==")
+    url=url.replace("=6=","==")
+    url=url.replace("=7=","==")
+    url=url.replace("=8=","==")
+    url=url.replace("=9=","==")
+    for letter in "^|()[]{}":
+        print(letter,urllib.parse.quote(letter))
+        url=url.replace(letter,urllib.parse.quote(letter))
+    url=url.replace("/","%2F")
+    url=url.replace("-","%2D")
+    url=url+"==="
+    return url
 
 class Tune(object):
     """Represents the chords in a song, with functionality to import the iReal format.
@@ -346,7 +373,7 @@ class Tune(object):
         return result
 
     @staticmethod
-    def parse_ireal_url(url):
+    def parse_ireal_url(url,convert=False):
         """Parses iReal urls into human- and machine-readable formats
 
         :param url: A url containing one or more tunes
@@ -356,6 +383,8 @@ class Tune(object):
 
         ``list_of_tunes = Tune.parse_ireal_url('irealb://Example%20Song=Composer...)```
         """
+        if convert==True:
+            url=convert_iReal_url(url)
         url = urllib.parse.unquote(url)
         match = re.match(r'irealb://([^"]+)', url)
         if match is None:
@@ -368,8 +397,11 @@ class Tune(object):
                 try:
                     tune = Tune(song)
                     tunes.append(tune)
-                    print('Parsed {}'.format(tune.title))
+                    #print('Parsed {}'.format(tune.title))
                 except Exception as err:
-                    print('Could not import song', song)
-                    print(str(err))
+                    if convert==False:
+                        return parse_ireal_url(url,convert=True)
+                    else:
+                        print('Could not import song', song)
+                        print(str(err))
         return tunes
