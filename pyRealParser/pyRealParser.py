@@ -374,34 +374,38 @@ class Tune(object):
 
     @staticmethod
     def parse_ireal_url(url,convert=False):
-        """Parses iReal urls into human- and machine-readable formats
+        return parse_ireal_url(url,convert)
+    
+    
+def parse_ireal_url(url,convert=False):
+    """Parses iReal urls into human- and machine-readable formats
 
-        :param url: A url containing one or more tunes
-        :return: A list of Tune objects
+    :param url: A url containing one or more tunes
+    :return: A list of Tune objects
 
-        Example:
+    Example:
 
-        ``list_of_tunes = Tune.parse_ireal_url('irealb://Example%20Song=Composer...)```
-        """
-        if convert==True:
-            url=convert_iReal_url(url)
-        url = urllib.parse.unquote(url)
-        match = re.match(r'irealb://([^"]+)', url)
-        if match is None:
-            raise RuntimeError('Provided string is not a valid iReal url!')
-        # split url into individual songs along ===
-        songs = re.split("===", match.group(1))
-        tunes = []
-        for song in songs:
-            if song != '':
-                try:
-                    tune = Tune(song)
-                    tunes.append(tune)
-                    #print('Parsed {}'.format(tune.title))
-                except Exception as err:
-                    if convert==False:
-                        return parse_ireal_url(url,convert=True)
-                    else:
-                        print('Could not import song', song)
-                        print(str(err))
-        return tunes
+    ``list_of_tunes = Tune.parse_ireal_url('irealb://Example%20Song=Composer...)```
+    """
+    if convert==True:
+        url=convert_iReal_url(url)
+    url = urllib.parse.unquote(url)
+    match = re.match(r'irealb://([^"]+)', url)
+    if match is None:
+        raise RuntimeError('Provided string is not a valid iReal url!')
+    # split url into individual songs along ===
+    songs = re.split("===", match.group(1))
+    tunes = []
+    for song in songs:
+        if song != '':
+            try:
+                tune = Tune(song)
+                tunes.append(tune)
+                #print('Parsed {}'.format(tune.title))
+            except Exception as err:
+                if convert==False:
+                    return parse_ireal_url(url,convert=True)
+                else:
+                    print('Could not import song', song)
+                    print(str(err))
+    return tunes
